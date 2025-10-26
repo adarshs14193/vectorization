@@ -36,20 +36,21 @@ for video_file in os.listdir(video_folder):
             continue
 
         frame_count = 0
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
-            gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-            resized = cv.resize(gray, resize_shape)
-            vector = resized.flatten().tolist()
-            frame_label = f"{video_file}_frame_{frame_count}"
-            data_rows.append([frame_label, "video"] + vector)
-            frame_count += 1
-        cap.release()
-        print(f" Processed {frame_count} frames from {video_file}")
+        try:
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    break
+                gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+                resized = cv.resize(gray, resize_shape)
+                vector = resized.flatten().tolist()
+                frame_label = f"{video_file}_frame_{frame_count}"
+                data_rows.append([frame_label, "video"] + vector)
+                frame_count += 1
+        finally:
+            cap.release() # Ensure the video capture is released
+            print(f" Processed {frame_count} frames from {video_file}")
 
 
 df = pd.DataFrame(data_rows, columns=columns)
 df.to_csv(output_csv, index=False)
-
